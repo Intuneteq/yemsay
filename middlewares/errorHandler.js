@@ -5,7 +5,7 @@ const errorHandler = function (err, req, res, next) {
     // A Multer error occurred when uploading.
     res
       .status(400)
-      .json({ message: "File size limit exceeded.", success: false });
+      .json({ message: err.message, success: false });
   } else if (err) {
     // An unknown error occurred when uploading.
     res

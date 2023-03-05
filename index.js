@@ -14,7 +14,8 @@ const connectDB = require("./utils/dbConnect");
 //import custom middlewares
 
 //import custom routes
-const authRoutes = require('./routes/authRouter')
+const authRoutes = require('./routes/authRouter');
+const propertyRoutes = require('./routes/propertyRouter');
 
 //Define middlewares
 const app = express();
@@ -48,6 +49,7 @@ app.get("/api", (req, res) => {
   res.send("Welcome to yemsay server");
 });
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/property', propertyRoutes);
 
 
 //invalid routes

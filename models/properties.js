@@ -32,6 +32,7 @@ const PropertySchema = new Schema({
   propertyStatus: {
     type: String,
     required: true,
+    default: 'unlisted',
     enum: ['listed', 'unlisted', 'deleted', 'sold']
   }
 }, {timestamps: true});

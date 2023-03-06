@@ -2,6 +2,7 @@
 
 //models
 const Properties = require("../models/properties");
+const Profiles = require("../models/profile");
 
 //utils
 const {
@@ -15,17 +16,13 @@ const { allTrue } = require("../lib/payload");
 
 const handleAddProperty = handleAsync(async (req, res) => {
   const user = req.user;
-  // console.log(user);
+  const images = req.files.images;
+  const video = req.files.video[0];
+  const { title, location, price, propertyType, description, tags, features } =
+    req.body;
 
-  const {
-    title,
-    location,
-    price,
-    propertyType,
-    description,
-    tags,
-    features,
-  } = req.body;
+  const admin = await Profiles.findById(user._id);
+  if (!admin) throw createApiError("user not found", 404);
 
   const payload = allTrue(
     title,
@@ -36,15 +33,27 @@ const handleAddProperty = handleAsync(async (req, res) => {
     tags,
     features
   );
+  if (!payload) throw createApiError("Payload Incomplete", 422);
 
-  // console.log(req.files)
-  // console.log(req.body)
+  const bufferedImgs = images.map(image => image.buffer);
+  const bufferedVideo = video.buffer;
 
-  // console.log(video)
+  const newProperty = new Properties({
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    media: {
+      imgs: bufferedImgs,
+      video: bufferedVideo
+    }
+  });
+  await newProperty.save();
 
-  if(!payload) throw createApiError('Payload Incomplete', 422);
-
-
+  res.status(201).json(handleResponse({message: 'Property created'}))
 });
 
 module.exports = {

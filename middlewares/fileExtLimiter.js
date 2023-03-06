@@ -17,7 +17,7 @@ const fileExtLimiter = (req, res, next) => {
       const images = req.files.images;
       const imgExt = images.map((img) => img.mimetype);
       const validImg = imgExt.every((ext) => {
-        return ext == "image/png" || ext == "image/jpeg";
+        return ext == "image/png" || ext == "image/jpeg" || ext == "image/jpg";
       });
       if (!validImg)
         return res

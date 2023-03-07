@@ -72,19 +72,30 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
     };
   });
 
-  res
-    .status(201)
-    .json(
-      handleResponse({
-        message: `These are the properties uploaded by ${user.email}`,
-        data: response,
-      })
-    );
+  res.status(201).json(
+    handleResponse({
+      message: `These are the properties uploaded by ${user.email}`,
+      data: response,
+    })
+  );
 });
 
-// const handleGetPropertyById = 
+const handleGetPropertyById = handleAsync(async (req, res) => {
+  const user = req.user;
+  const { propertyId } = req.params;
+
+  const property = await Properties.findOne({
+    adminId: user._id,
+    _id: propertyId,
+  });
+
+  console.log(property);
+
+  res.status(201).json(handleResponse({ message: "Property" }));
+});
 
 module.exports = {
   handleAddProperty,
   handleGetAllProperties,
+  handleGetPropertyById,
 };

@@ -32,10 +32,12 @@ const errorHandler = require("../middlewares/errorHandler");
 const {
   handleAddProperty,
   handleGetAllProperties,
+  handleGetPropertyById,
 } = require("../controllers/propertyController");
 
 //get req
 router.get("/", authentication, handleGetAllProperties);
+router.get("/:propertyId", authentication, handleGetPropertyById);
 
 //post req
 router.post(

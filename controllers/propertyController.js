@@ -10,7 +10,7 @@ const {
 
 //helpers
 const { allTrue } = require("../lib/payload");
-const { uploadProperty } = require('../lib/propertyHelpers');
+const { uploadProperty } = require("../lib/propertyHelpers");
 
 const handleAddProperty = handleAsync(async (req, res) => {
   const user = req.user;
@@ -44,9 +44,9 @@ const handleAddProperty = handleAsync(async (req, res) => {
     features,
     media: {
       imgs: [publicUrls[0], publicUrls[1], publicUrls[2], publicUrls[3]],
-      video: publicUrls[4]
-    }
-  })
+      video: publicUrls[4],
+    },
+  });
 
   await newProperty.save();
 
@@ -56,10 +56,33 @@ const handleAddProperty = handleAsync(async (req, res) => {
 const handleGetAllProperties = handleAsync(async (req, res) => {
   const user = req.user;
 
-  // const properties = await
+  const properties = await Properties.find({ adminId: user._id });
 
+  const response = properties.map((property) => {
+    return {
+      id: property._id,
+      title: property.title,
+      location: property.location,
+      price: property.price,
+      type: property.propertyType,
+      status: property.propertyStatus,
+      tags: property.tags,
+      features: property.features,
+      media: property.media,
+    };
+  });
 
+  res
+    .status(201)
+    .json(
+      handleResponse({
+        message: `These are the properties uploaded by ${user.email}`,
+        data: response,
+      })
+    );
 });
+
+// const handleGetPropertyById = 
 
 module.exports = {
   handleAddProperty,

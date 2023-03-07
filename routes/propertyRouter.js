@@ -6,7 +6,6 @@ const multer = require("multer");
 //Define consts
 const router = express.Router();
 const dest = path.join(__dirname, "../uploads");
-// const storage = multer.memoryStorage();
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, path.join(__dirname, '../uploads'));

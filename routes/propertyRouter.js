@@ -8,12 +8,12 @@ const router = express.Router();
 const dest = path.join(__dirname, "../uploads");
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, path.join(__dirname, "../uploads"));
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
-  }
-})
+  },
+});
 const upload = multer({
   dest: dest,
   storage: storage,
@@ -34,6 +34,8 @@ const {
   handleGetAllProperties,
   handleGetPropertyById,
   handleDashboard,
+  handlePropertyListing,
+  handleEditProperty
 } = require("../controllers/propertyController");
 
 //get req
@@ -54,6 +56,8 @@ router.post(
 );
 
 //put or patch req
+router.patch("/listing/:propertyId", authentication, handlePropertyListing);
+router.put("/:propertyId", authentication, handleEditProperty);
 
 //delete req
 

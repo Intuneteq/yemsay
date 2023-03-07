@@ -13,6 +13,7 @@ const { allTrue } = require("../lib/payload");
 const { uploadProperty } = require("../lib/propertyHelpers");
 
 const handleAddProperty = handleAsync(async (req, res) => {
+  //get auth user
   const user = req.user;
   const images = req.files.images;
   const video = req.files.video[0];
@@ -30,9 +31,13 @@ const handleAddProperty = handleAsync(async (req, res) => {
   );
   if (!payload) throw createApiError("Payload Incomplete", 422);
 
+  //property media to be uploaded
   const propertyMedia = [...images, video];
+
+  //upload property media to google clouds
   const publicUrls = await uploadProperty(propertyMedia);
 
+  //create new property
   const newProperty = new Properties({
     adminId: user._id,
     title,
@@ -54,16 +59,20 @@ const handleAddProperty = handleAsync(async (req, res) => {
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {
+  //get auth user
   const user = req.user;
 
+  //find admin properties
   const properties = await Properties.find({ adminId: user._id });
 
+  //house properties
   const houses = {
     listedProperties: [],
     unlistedProperties: [],
     soldProperties: [],
   };
 
+  //land properties
   const lands = {
     listedProperties: [],
     unlistedProperties: [],
@@ -111,33 +120,32 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
     }
 
     if (listedLand) {
-      lands.listedProperties.push(item)
+      lands.listedProperties.push(item);
     }
 
-    if(unlistedLand) {
-      lands.unlistedProperties.push(item)
+    if (unlistedLand) {
+      lands.unlistedProperties.push(item);
     }
 
-    if(soldLand) {
-      lands.soldProperties.push(item)
+    if (soldLand) {
+      lands.soldProperties.push(item);
     }
   });
 
-  res
-    .status(201)
-    .json(
-      handleResponse({ houses, lands })
-    );
+  res.status(201).json(handleResponse({ houses, lands }));
 });
 
 const handleGetPropertyById = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
+  //find admin properties with propertyId
   const property = await Properties.findOne({
     adminId: user._id,
     _id: propertyId,
   });
+
+  if (!property) throw createApiError("property not found", 404);
 
   res.status(201).json(handleResponse({ property }));
 });
@@ -178,9 +186,43 @@ const handleDashboard = handleAsync(async (req, res) => {
   });
 });
 
+const handlePropertyListing = handleAsync(async (req, res) => {
+  const user = req.user;
+  const { status } = req.body;
+  const { propertyId } = req.params;
+
+  if (!["listed", "unlisted"].includes(status)) {
+    throw createApiError("Invalid property status provided", 400);
+  }
+
+  //find admin properties with propertyId and update
+  const property = await Properties.findOneAndUpdate(
+    {
+      adminId: user._id,
+      _id: propertyId,
+    },
+    { $set: { propertyStatus: status } },
+    { new: true }
+  );
+
+  if (!property) {
+    throw createApiError("Property not found", 404);
+  }
+
+  res.status(200).json(handleResponse({ property }));
+});
+
+const handleEditProperty = handleAsync(async (req, res) => {
+  const user = req.user;
+  const { propertyId } = req.params;
+  const {} = req.body;
+})
+
 module.exports = {
   handleAddProperty,
   handleGetAllProperties,
   handleGetPropertyById,
   handleDashboard,
+  handlePropertyListing,
+  handleEditProperty
 };

@@ -33,10 +33,12 @@ const {
   handleAddProperty,
   handleGetAllProperties,
   handleGetPropertyById,
+  handleDashboard,
 } = require("../controllers/propertyController");
 
 //get req
 router.get("/", authentication, handleGetAllProperties);
+router.get("/dashboard", authentication, handleDashboard);
 router.get("/:propertyId", authentication, handleGetPropertyById);
 
 //post req

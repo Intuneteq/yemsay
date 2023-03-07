@@ -58,8 +58,20 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
 
   const properties = await Properties.find({ adminId: user._id });
 
-  const response = properties.map((property) => {
-    return {
+  const houses = {
+    listedProperties: [],
+    unlistedProperties: [],
+    soldProperties: [],
+  };
+
+  const lands = {
+    listedProperties: [],
+    unlistedProperties: [],
+    soldProperties: [],
+  };
+
+  properties.forEach((property) => {
+    const item = {
       id: property._id,
       title: property.title,
       location: property.location,
@@ -69,15 +81,53 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
       tags: property.tags,
       features: property.features,
       media: property.media,
+      createdAt: property.createdAt,
     };
+
+    const listedHouse =
+      property.propertyType == "house" && property.propertyStatus == "listed";
+    const unlistedHouse =
+      property.propertyType == "house" && property.propertyStatus == "unlisted";
+    const soldHouse =
+      property.propertyType == "house" && property.propertyStatus == "sold";
+
+    const listedLand =
+      property.propertyType == "land" && property.propertyStatus == "listed";
+    const unlistedLand =
+      property.propertyType == "land" && property.propertyStatus == "unlisted";
+    const soldLand =
+      property.propertyType == "land" && property.propertyStatus == "sold";
+
+    if (listedHouse) {
+      houses.listedProperties.push(item);
+    }
+
+    if (unlistedHouse) {
+      houses.unlistedProperties.push(item);
+    }
+
+    if (soldHouse) {
+      houses.soldProperties.push(item);
+    }
+
+    if (listedLand) {
+      lands.listedProperties.push(item)
+    }
+
+    if(unlistedLand) {
+      lands.unlistedProperties.push(item)
+    }
+
+    if(soldLand) {
+      lands.soldProperties.push(item)
+    }
   });
 
-  res.status(201).json(
-    handleResponse({
-      message: `These are the properties uploaded by ${user.email}`,
-      data: response,
-    })
-  );
+  res
+    .status(201)
+    .json(
+      handleResponse({ houses, lands })
+    );
 });
 
 const handleGetPropertyById = handleAsync(async (req, res) => {
@@ -89,13 +139,48 @@ const handleGetPropertyById = handleAsync(async (req, res) => {
     _id: propertyId,
   });
 
-  console.log(property);
+  res.status(201).json(handleResponse({ property }));
+});
 
-  res.status(201).json(handleResponse({ message: "Property" }));
+const handleDashboard = handleAsync(async (req, res) => {
+  const user = req.user;
+
+  const properties = await Properties.find({ adminId: user._id });
+
+  let listed = 0;
+  let unlisted = 0;
+  const recentlyAddedProperties = properties
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map((property) => {
+      if (property.propertyStatus == "listed") listed++;
+      if (property.propertyStatus == "unlisted") unlisted++;
+
+      return {
+        id: property._id,
+        title: property.title,
+        location: property.location,
+        price: property.price,
+        type: property.propertyType,
+        status: property.propertyStatus,
+        tags: property.tags,
+        features: property.features,
+        media: property.media,
+        createdAt: property.createdAt,
+      };
+    })
+    .slice(0, 2);
+
+  res.status(201).json({
+    listed,
+    unlisted,
+    allProperties: properties.length,
+    recentlyAdded: recentlyAddedProperties,
+  });
 });
 
 module.exports = {
   handleAddProperty,
   handleGetAllProperties,
   handleGetPropertyById,
+  handleDashboard,
 };

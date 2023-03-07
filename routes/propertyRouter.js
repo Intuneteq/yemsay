@@ -6,7 +6,15 @@ const multer = require("multer");
 //Define consts
 const router = express.Router();
 const dest = path.join(__dirname, "../uploads");
-const storage = multer.memoryStorage();
+// const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+})
 const upload = multer({
   dest: dest,
   storage: storage,
@@ -22,9 +30,13 @@ const fileExtLimiter = require("../middlewares/fileExtLimiter");
 const errorHandler = require("../middlewares/errorHandler");
 
 //import controller
-const { handleAddProperty } = require("../controllers/propertyController");
+const {
+  handleAddProperty,
+  handleGetAllProperties,
+} = require("../controllers/propertyController");
 
 //get req
+router.get("/", authentication, handleGetAllProperties);
 
 //post req
 router.post(

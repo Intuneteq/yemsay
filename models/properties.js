@@ -3,6 +3,11 @@ const { Schema } = mongoose;
 
 const PropertySchema = new Schema(
   {
+    adminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "Profile",
+    },
     title: {
       type: String,
       required: true,
@@ -25,15 +30,11 @@ const PropertySchema = new Schema(
       required: true,
     },
     media: {
-      imgs: [
-        {
-          type: Buffer,
-          contentType: String,
-        },
-      ],
+      imgs: {
+        type: [String]
+      },
       video: {
-        type: Buffer,
-        contentType: String,
+        type: String
       },
     },
     tags: [String],

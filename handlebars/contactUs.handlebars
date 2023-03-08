@@ -1,0 +1,55 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>Yemsay Mailer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+    </style>
+  </head>
+
+  <body>
+    <div class="mail-content">
+      <header>
+        <h1>You Received A Mail From: {{{fullName}}}</h1>
+      </header>
+
+      <div class="content-container">
+        <section class="content-head">
+          <p style="margin-bottom: 23px;">Hi Yemsay,</p>
+          <p style="margin-bottom: 46px;">There’s a mail for you sent from your
+            website.</p>
+          <p>Here’s all you need to know about the mail:</p>
+        </section>
+
+        <section class="content-body">
+          <div class="content">
+            <h6>Sender Name:</h6>
+            <p style="text-transform: capitalize;">{{{name}}}</p>
+          </div>
+          <div class="content">
+            <h6>Sender Email:</h6>
+            <p>{{{email}}}</p>
+          </div>
+          <div class="content">
+            <h6>Sender PhoneNumber:</h6>
+            <p>{{{PhoneNumber}}}</p>
+          </div>
+          <div class="content">
+            <h6>Mail Subject:</h6>
+            <p>Contact Us</p>
+          </div>
+          <div class="content">
+            <h6>Sender Message:</h6>
+            <p>{{{message}}}</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>

@@ -32,20 +32,26 @@ const errorHandler = require("../middlewares/errorHandler");
 const {
   handleAddProperty,
   handleGetAllProperties,
-  handleGetPropertyById,
+  handleGetAdminPropertyById,
   handleDashboard,
   handlePropertyListing,
   handleEditProperty,
+  handleListedLands,
+  handleListedHouses,
+  handleGetProperty,
 } = require("../controllers/propertyController");
 
 //get req
-router.get("/", authentication, handleGetAllProperties);
-router.get("/dashboard", authentication, handleDashboard);
-router.get("/:propertyId", authentication, handleGetPropertyById);
+router.get("/lands", handleListedLands)
+router.get("/houses", handleListedHouses)
+router.get("/admin", authentication, handleGetAllProperties);
+router.get("/admin/dashboard", authentication, handleDashboard);
+router.get("/admin/:propertyId", authentication, handleGetAdminPropertyById);
+router.get("/:propertyId", handleGetProperty)
 
 //post req
 router.post(
-  "/",
+  "/admin",
   authentication,
   upload.fields([
     { name: "images", maxCount: 4 },
@@ -56,9 +62,9 @@ router.post(
 );
 
 //put or patch req
-router.patch("/listing/:propertyId", authentication, handlePropertyListing);
+router.patch("/admin/listing/:propertyId", authentication, handlePropertyListing);
 router.put(
-  "/:propertyId",
+  "/admin/:propertyId",
   authentication,
   upload.fields([
     { name: "images", maxCount: 4 },

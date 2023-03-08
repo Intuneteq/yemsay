@@ -145,7 +145,7 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
   res.status(201).json(handleResponse({ houses, lands }));
 });
 
-const handleGetPropertyById = handleAsync(async (req, res) => {
+const handleGetAdminPropertyById = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
@@ -286,11 +286,57 @@ const handleEditProperty = handleAsync(async (req, res) => {
   res.status(200).json(handleResponse({ property }));
 });
 
+const handleListedLands = handleAsync(async (req, res) => {
+  const allProperties = await Properties.find();
+
+  if (!allProperties || allProperties.length === 0)
+    throw createApiError("properties not found", 404);
+
+  const listedLands = allProperties.filter((property) => {
+    return property.propertyType === "land";
+  });
+
+  res.status(200).json({ listedLands });
+});
+
+const handleListedHouses = handleAsync(async (req, res) => {
+  const allProperties = await Properties.find();
+
+  if (!allProperties || allProperties.length === 0)
+    throw createApiError("properties not found", 404);
+
+  const listedHouses = allProperties.filter((property) => {
+    return property.propertyType === "house";
+  });
+
+  res.status(200).json({ listedHouses });
+})
+
+const handleGetProperty = handleAsync(async (req, res) => {
+  const { propertyId } = req.params
+
+  const property = await Properties.findById(propertyId)
+  if(!property) throw createApiError('property not found', 404);
+
+  const propertyType = property.propertyType
+
+  const similarProperties = await Properties
+  .where('propertyType').equals(propertyType)
+  .where('propertyStatus').equals('listed')
+  .limit(9)
+  .exec();
+
+  res.status(200).json({ property, similarProperties });
+})
+
 module.exports = {
   handleAddProperty,
   handleGetAllProperties,
-  handleGetPropertyById,
+  handleGetAdminPropertyById,
   handleDashboard,
   handlePropertyListing,
   handleEditProperty,
+  handleListedLands,
+  handleListedHouses,
+  handleGetProperty
 };

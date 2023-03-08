@@ -4,7 +4,7 @@ const router = express.Router();
 //import middleware
 
 //import controller
-const { handleSignUp, handleLogin } = require("../controllers/authController");
+const { handleSignUp, handleLogin } = require("../controllers/auth.controller");
 
 //get req
 

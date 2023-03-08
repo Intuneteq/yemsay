@@ -39,7 +39,7 @@ const {
   handleListedLands,
   handleListedHouses,
   handleGetProperty,
-} = require("../controllers/propertyController");
+} = require("../controllers/property.controller");
 
 //get req
 router.get("/lands", handleListedLands)

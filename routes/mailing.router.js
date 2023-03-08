@@ -4,12 +4,13 @@ const router = express.Router();
 //import middleware
 
 //import controller
-const { handleContactUs } = require("../controllers/mailing.controller");
+const { handleContactUs, handleBookAppointment } = require("../controllers/mailing.controller");
 
 //get req
 
 //post req
 router.post("/contact-us", handleContactUs);
+router.post("/appointment", handleBookAppointment);
 
 //put or patch req
 

@@ -37,23 +37,31 @@ const handleAddProperty = handleAsync(async (req, res) => {
   //upload property media to google clouds
   const publicUrls = await uploadProperty(propertyMedia);
 
-  //create new property
-  const newProperty = new Properties({
-    adminId: user._id,
-    title,
-    location,
-    price,
-    propertyType,
-    description,
-    tags,
-    features,
-    media: {
-      imgs: [publicUrls[0], publicUrls[1], publicUrls[2], publicUrls[3]],
-      video: publicUrls[4],
-    },
-  });
+  // extract video url. It will always come last
+  const videoUrl = publicUrls.pop();
+  const media = {
+    imgs: [...publicUrls],
+    video: videoUrl,
+  };
 
-  await newProperty.save();
+  //create new property
+  try {
+    const newProperty = new Properties({
+      adminId: user._id,
+      title,
+      location,
+      price,
+      propertyType,
+      description,
+      tags,
+      features,
+      media,
+    });
+
+    await newProperty.save();
+  } catch (error) {
+    throw createApiError("server error", 500);
+  }
 
   res.status(201).json(handleResponse({ message: "Property created" }));
 });
@@ -64,6 +72,8 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
 
   //find admin properties
   const properties = await Properties.find({ adminId: user._id });
+  if (!properties || properties.length === 0)
+    throw createApiError("properties not found", 404);
 
   //house properties
   const houses = {
@@ -139,7 +149,7 @@ const handleGetPropertyById = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  //find admin properties with propertyId
+  //find property properties with adminId and propertyId
   const property = await Properties.findOne({
     adminId: user._id,
     _id: propertyId,
@@ -154,6 +164,8 @@ const handleDashboard = handleAsync(async (req, res) => {
   const user = req.user;
 
   const properties = await Properties.find({ adminId: user._id });
+  if (!properties || properties.length === 0)
+    throw createApiError("properties not found", 404);
 
   let listed = 0;
   let unlisted = 0;
@@ -215,8 +227,64 @@ const handlePropertyListing = handleAsync(async (req, res) => {
 const handleEditProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
-  const {} = req.body;
-})
+  const images = req.files.images;
+  const video = req.files.video[0];
+  const { title, location, price, propertyType, description, tags, features } =
+    req.body;
+
+  const payload = allTrue(
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    images,
+    video
+  );
+  if (!payload) throw createApiError("Payload Incomplete", 422);
+
+  //property media to be uploaded
+  const propertyMedia = [...images, video];
+
+  //upload property media to google clouds
+  const publicUrls = await uploadProperty(propertyMedia);
+
+  // extract video url. It will always come last
+  const videoUrl = publicUrls.pop();
+  const media = {
+    imgs: [...publicUrls],
+    video: videoUrl,
+  };
+
+  //find admin properties with propertyId and update
+  const property = await Properties.findOneAndUpdate(
+    {
+      adminId: user._id,
+      _id: propertyId,
+    },
+    {
+      $set: {
+        title,
+        location,
+        price,
+        propertyType,
+        description,
+        media,
+        tags,
+        features,
+      },
+    },
+    { new: true }
+  );
+
+  if (!property) {
+    throw createApiError("Property not found", 404);
+  }
+
+  res.status(200).json(handleResponse({ property }));
+});
 
 module.exports = {
   handleAddProperty,
@@ -224,5 +292,5 @@ module.exports = {
   handleGetPropertyById,
   handleDashboard,
   handlePropertyListing,
-  handleEditProperty
+  handleEditProperty,
 };

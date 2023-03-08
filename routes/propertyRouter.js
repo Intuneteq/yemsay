@@ -35,7 +35,7 @@ const {
   handleGetPropertyById,
   handleDashboard,
   handlePropertyListing,
-  handleEditProperty
+  handleEditProperty,
 } = require("../controllers/propertyController");
 
 //get req
@@ -57,7 +57,16 @@ router.post(
 
 //put or patch req
 router.patch("/listing/:propertyId", authentication, handlePropertyListing);
-router.put("/:propertyId", authentication, handleEditProperty);
+router.put(
+  "/:propertyId",
+  authentication,
+  upload.fields([
+    { name: "images", maxCount: 4 },
+    { name: "video", maxCount: 1 },
+  ]),
+  fileExtLimiter,
+  handleEditProperty
+);
 
 //delete req
 

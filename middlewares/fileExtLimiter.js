@@ -1,7 +1,10 @@
 const { someEquallyTrue } = require("../lib/payload");
 
 const fileExtLimiter = (req, res, next) => {
-  if (req.files) {
+  if (Object.keys(req.files).length >= 1) {
+    if (!req.files.video || !req.files.images)
+      return res.status(400).json({ success: false, message: "upload media" });
+
     if (req.files.video) {
       const videos = req.files.video;
       const videoExt = videos.map((video) => video.mimetype);
@@ -24,9 +27,10 @@ const fileExtLimiter = (req, res, next) => {
           .status(400)
           .json({ message: "image file not supported", success: false });
     }
+    next();
+  } else {
+    return res.status(400).json({ success: false, message: "upload media" });
   }
-
-  next();
 };
 
 module.exports = fileExtLimiter;

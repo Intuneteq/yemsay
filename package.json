@@ -1,7 +1,7 @@
 {
-  "name": "Expressjs Starter Template",
+  "name": "yemsay",
   "version": "1.0.0",
-  "description": "Expressjs Template",
+  "description": "yemsay project",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

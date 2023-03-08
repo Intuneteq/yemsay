@@ -14,8 +14,9 @@ const connectDB = require("./utils/dbConnect");
 //import custom middlewares
 
 //import custom routes
-const authRoutes = require('./routes/authRouter');
-const propertyRoutes = require('./routes/propertyRouter');
+const authRoutes = require('./routes/auth.router');
+const propertyRoutes = require('./routes/property.router');
+const mailingRoutes = require('./routes/mailing.router')
 
 //Define middlewares
 const app = express();
@@ -50,6 +51,7 @@ app.get("/api", (req, res) => {
 });
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/property', propertyRoutes);
+app.use('/api/v1/mailing', mailingRoutes);
 
 
 //invalid routes

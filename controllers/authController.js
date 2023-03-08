@@ -2,7 +2,7 @@
 const bcrypt = require("bcryptjs");
 
 //models
-const Profile = require("../models/profile");
+const Profile = require("../models/profile.model");
 
 //utils
 const {

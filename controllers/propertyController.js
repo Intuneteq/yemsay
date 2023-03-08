@@ -1,5 +1,5 @@
 //models
-const Properties = require("../models/properties");
+const Properties = require("../models/property.model");
 
 //utils
 const {

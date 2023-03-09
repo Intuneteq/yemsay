@@ -7,15 +7,12 @@ const multer = require("multer");
 const router = express.Router();
 const dest = path.join(__dirname, "../uploads");
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "../uploads"));
-  },
+  destination: dest,
   filename: function (req, file, cb) {
     cb(null, file.originalname);
   },
 });
 const upload = multer({
-  dest: dest,
   storage: storage,
   limits: {
     fileSize: 10485760,

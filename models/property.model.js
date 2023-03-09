@@ -1,6 +1,39 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// const ReviewSchema = require('./review.model');
+
+const ReviewSchema = new Schema({
+  property: {
+    type: Number,
+    default: 0,
+  },
+  valueForMoney: {
+    type: Number,
+    default: 0,
+  },
+  location: {
+    type: Number,
+    default: 0,
+  },
+  support: {
+    type: Number,
+    default: 0,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  review: {
+    type: String,
+  },
+});
+
+
 const PropertySchema = new Schema(
   {
     adminId: {
@@ -45,6 +78,7 @@ const PropertySchema = new Schema(
       default: "unlisted",
       enum: ["listed", "unlisted", "deleted", "sold"],
     },
+    reviews: ReviewSchema
   },
   { timestamps: true }
 );

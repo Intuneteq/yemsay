@@ -36,6 +36,7 @@ const {
   handleListedLands,
   handleListedHouses,
   handleGetProperty,
+  handleAddReview
 } = require("../controllers/property.controller");
 
 //get req
@@ -57,6 +58,7 @@ router.post(
   fileExtLimiter,
   handleAddProperty
 );
+router.post('/review/:propertyId', handleAddReview);
 
 //put or patch req
 router.patch("/admin/listing/:propertyId", authentication, handlePropertyListing);

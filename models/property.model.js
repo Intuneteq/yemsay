@@ -1,38 +1,23 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-// const ReviewSchema = require('./review.model');
-
-const ReviewSchema = new Schema({
-  property: {
-    type: Number,
-    default: 0,
+const ReviewerSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    review: {
+      type: String,
+      required: true,
+    },
   },
-  valueForMoney: {
-    type: Number,
-    default: 0,
-  },
-  location: {
-    type: Number,
-    default: 0,
-  },
-  support: {
-    type: Number,
-    default: 0,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  review: {
-    type: String,
-  },
-});
-
+  { timestamps: true }
+);
 
 const PropertySchema = new Schema(
   {
@@ -64,10 +49,10 @@ const PropertySchema = new Schema(
     },
     media: {
       imgs: {
-        type: [String]
+        type: [String],
       },
       video: {
-        type: String
+        type: String,
       },
     },
     tags: [String],
@@ -78,9 +63,59 @@ const PropertySchema = new Schema(
       default: "unlisted",
       enum: ["listed", "unlisted", "deleted", "sold"],
     },
-    reviews: ReviewSchema
+    avgPropertyScore: {
+      type: Number,
+      default: 0,
+    },
+    avgValueForMoneyScore: {
+      type: Number,
+      default: 0,
+    },
+    avgLocationScore: {
+      type: Number,
+      default: 0,
+    },
+    avgSupportScore: {
+      type: Number,
+      default: 0,
+    },
+    avgReviewScore: {
+      type: Number,
+      default: 0,
+    },
+    totalReviewers: {
+      type: Number,
+      default: 0,
+    },
+    reviewers: [ReviewerSchema],
   },
   { timestamps: true }
 );
+
+PropertySchema.virtual("reviewerCount").get(function () {
+  return this.reviewers.length;
+});
+
+PropertySchema.methods.updateReviews = function ({
+  property,
+  valueForMoney,
+  location,
+  support,
+}) {
+  this.avgPropertyScore = Math.ceil((this.avgPropertyScore + property) / 2);
+  this.avgValueForMoneyScore = Math.ceil(
+    (this.avgValueForMoneyScore + valueForMoney) / 2
+  );
+  this.avgLocationScore = Math.ceil((this.avgLocationScore + location) / 2);
+  this.avgSupportScore = Math.ceil((this.avgSupportScore + support) / 2);
+  this.avgReviewScore = Math.ceil(
+    (this.avgPropertyScore +
+      this.avgValueForMoneyScore +
+      this.avgLocationScore +
+      this.avgSupportScore +
+      5) /
+      5
+  );
+};
 
 module.exports = mongoose.model("Property", PropertySchema);

@@ -11,6 +11,7 @@ const {
 //helpers
 const { allTrue } = require("../lib/payload");
 const { uploadProperty } = require("../lib/propertyHelpers");
+const { findById } = require("../models/profile.model");
 
 const handleAddProperty = handleAsync(async (req, res) => {
   //get auth user
@@ -310,24 +311,55 @@ const handleListedHouses = handleAsync(async (req, res) => {
   });
 
   res.status(200).json({ listedHouses });
-})
+});
 
 const handleGetProperty = handleAsync(async (req, res) => {
-  const { propertyId } = req.params
+  const { propertyId } = req.params;
 
-  const property = await Properties.findById(propertyId)
-  if(!property) throw createApiError('property not found', 404);
+  const property = await Properties.findById(propertyId);
+  if (!property) throw createApiError("property not found", 404);
 
-  const propertyType = property.propertyType
+  const propertyType = property.propertyType;
 
-  const similarProperties = await Properties
-  .where('propertyType').equals(propertyType)
-  .where('propertyStatus').equals('listed')
-  .limit(9)
-  .exec();
+  const similarProperties = await Properties.where("propertyType")
+    .equals(propertyType)
+    .where("propertyStatus")
+    .equals("listed")
+    .limit(9)
+    .exec();
 
   res.status(200).json({ property, similarProperties });
-})
+});
+
+const handleAddReview = handleAsync(async (req, res) => {
+  const { propertyId } = req.params;
+  const { property, valueForMoney, location, support, name, email, review } =
+    req.body;
+
+  //Get Property
+  const selectedProperty = await Properties.findById(propertyId);
+
+  //save reviewer
+  selectedProperty.reviewers = [
+    ...selectedProperty.reviewers,
+    { name, email, review },
+  ];
+
+  //update reviewer count by invoking the virtual method
+  selectedProperty.totalReviewers = selectedProperty.reviewerCount;
+
+  //update review scores by invoking the UpdateReviews method
+  selectedProperty.updateReviews({
+    property,
+    valueForMoney,
+    location,
+    support,
+  });
+
+  await selectedProperty.save();
+
+  res.status(200).json({ message: "review updated" });
+});
 
 module.exports = {
   handleAddProperty,
@@ -338,5 +370,6 @@ module.exports = {
   handleEditProperty,
   handleListedLands,
   handleListedHouses,
-  handleGetProperty
+  handleGetProperty,
+  handleAddReview,
 };

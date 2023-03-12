@@ -11,7 +11,6 @@ const {
 //helpers
 const { allTrue } = require("../lib/payload");
 const { uploadProperty } = require("../lib/propertyHelpers");
-const { findById } = require("../models/profile.model");
 
 const handleAddProperty = handleAsync(async (req, res) => {
   //get auth user
@@ -27,8 +26,8 @@ const handleAddProperty = handleAsync(async (req, res) => {
     price,
     propertyType,
     description,
-    tags,
-    features
+    tags.length,
+    features.length
   );
   if (!payload) throw createApiError("Payload Incomplete", 422);
 
@@ -46,25 +45,27 @@ const handleAddProperty = handleAsync(async (req, res) => {
   };
 
   //create new property
-  try {
-    const newProperty = new Properties({
-      adminId: user._id,
-      title,
-      location,
-      price,
-      propertyType,
-      description,
-      tags,
-      features,
-      media,
-    });
+  const newProperty = new Properties({
+    adminId: user._id,
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    media,
+  });
 
+  try {
     await newProperty.save();
   } catch (error) {
     throw createApiError("server error", 500);
   }
 
-  res.status(201).json(handleResponse({ message: "Property created" }));
+  res
+    .status(201)
+    .json(handleResponse({ message: "Property created", data: newProperty }));
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {
@@ -73,7 +74,7 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
 
   //find admin properties
   const properties = await Properties.find({ adminId: user._id });
-  if (!properties || properties.length === 0)
+  if (!properties || !properties.length)
     throw createApiError("properties not found", 404);
 
   //house properties
@@ -91,18 +92,7 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
   };
 
   properties.forEach((property) => {
-    const item = {
-      id: property._id,
-      title: property.title,
-      location: property.location,
-      price: property.price,
-      type: property.propertyType,
-      status: property.propertyStatus,
-      tags: property.tags,
-      features: property.features,
-      media: property.media,
-      createdAt: property.createdAt,
-    };
+    const item = property.format();
 
     const listedHouse =
       property.propertyType == "house" && property.propertyStatus == "listed";
@@ -176,18 +166,7 @@ const handleDashboard = handleAsync(async (req, res) => {
       if (property.propertyStatus == "listed") listed++;
       if (property.propertyStatus == "unlisted") unlisted++;
 
-      return {
-        id: property._id,
-        title: property.title,
-        location: property.location,
-        price: property.price,
-        type: property.propertyType,
-        status: property.propertyStatus,
-        tags: property.tags,
-        features: property.features,
-        media: property.media,
-        createdAt: property.createdAt,
-      };
+      return property.format();
     })
     .slice(0, 2);
 
@@ -288,27 +267,21 @@ const handleEditProperty = handleAsync(async (req, res) => {
 });
 
 const handleListedLands = handleAsync(async (req, res) => {
-  const allProperties = await Properties.find();
-
-  if (!allProperties || allProperties.length === 0)
-    throw createApiError("properties not found", 404);
-
-  const listedLands = allProperties.filter((property) => {
-    return property.propertyType === "land";
-  });
+  const listedLands = await Properties.find()
+    .where("propertyType")
+    .equals("land")
+    .where("propertyStatus")
+    .equals("listed");
 
   res.status(200).json({ listedLands });
 });
 
 const handleListedHouses = handleAsync(async (req, res) => {
-  const allProperties = await Properties.find();
-
-  if (!allProperties || allProperties.length === 0)
-    throw createApiError("properties not found", 404);
-
-  const listedHouses = allProperties.filter((property) => {
-    return property.propertyType === "house";
-  });
+  const listedHouses = await Properties.find()
+    .where("propertyType")
+    .equals("house")
+    .where("propertyStatus")
+    .equals("listed");
 
   res.status(200).json({ listedHouses });
 });

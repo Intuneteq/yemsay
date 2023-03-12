@@ -118,4 +118,19 @@ PropertySchema.methods.updateReviews = function ({
   );
 };
 
+PropertySchema.methods.format = function () {
+  return {
+    id: this._id,
+    title: this.title,
+    location: this.location,
+    price: this.price,
+    type: this.propertyType,
+    status: this.propertyStatus,
+    tags: this.tags,
+    features: this.features,
+    media: this.media,
+    createdAt: this.createdAt,
+  };
+};
+
 module.exports = mongoose.model("Property", PropertySchema);

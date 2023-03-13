@@ -127,7 +127,7 @@ const handleUploadWithUrl = handleAsync(async (req, res) => {
 
   res
     .status(201)
-    .json(handleResponse({ message: "Property created", results }));
+    .json(handleResponse({ message: "Property created", results, property: newProperty }));
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {

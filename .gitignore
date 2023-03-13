@@ -1,6 +1,8 @@
 node_modules
 .env
 
+client_secret.json
+
 .env
 
 client_secret.json

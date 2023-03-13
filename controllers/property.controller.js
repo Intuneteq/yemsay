@@ -97,14 +97,37 @@ const handleUploadWithUrl = handleAsync(async (req, res) => {
   //property media to be uploaded
   const propertyMedia = [...images, video];
 
-  console.log(propertyMedia)
+  const results = await getSignedUrl(propertyMedia);
 
-  const signedUrls = await getSignedUrl(propertyMedia);
-  console.log(signedUrls)
+  // extract video url. It will always come last
+  const videoResult = results.pop();
+  const media = {
+    imgs: results.map((img) => img.publicUrl),
+    video: videoResult.publicUrl,
+  };
+
+  //create new property
+  const newProperty = new Properties({
+    adminId: user._id,
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    media,
+  });
+
+  try {
+    await newProperty.save();
+  } catch (error) {
+    throw createApiError("server error", 500);
+  }
 
   res
-  .status(201)
-  .json(handleResponse({ message: "Property created" }));
+    .status(201)
+    .json(handleResponse({ message: "Property created", results }));
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {

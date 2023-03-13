@@ -155,7 +155,7 @@ const handleDashboard = handleAsync(async (req, res) => {
   const user = req.user;
 
   const properties = await Properties.find({ adminId: user._id });
-  if (!properties || properties.length === 0)
+  if (!properties || !properties.length)
     throw createApiError("properties not found", 404);
 
   let listed = 0;

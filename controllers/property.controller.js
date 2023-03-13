@@ -10,7 +10,7 @@ const {
 
 //helpers
 const { allTrue } = require("../lib/payload");
-const { uploadProperty } = require("../lib/propertyHelpers");
+const { uploadProperty, getSignedUrl } = require("../lib/propertyHelpers");
 
 const handleAddProperty = handleAsync(async (req, res) => {
   //get auth user
@@ -66,6 +66,45 @@ const handleAddProperty = handleAsync(async (req, res) => {
   res
     .status(201)
     .json(handleResponse({ message: "Property created", data: newProperty }));
+});
+
+const handleUploadWithUrl = handleAsync(async (req, res) => {
+  //get auth user
+  const user = req.user;
+  const {
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    images,
+    video,
+  } = req.body;
+
+  const payload = allTrue(
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags.length,
+    features.length
+  );
+  if (!payload) throw createApiError("Payload Incomplete", 422);
+
+  //property media to be uploaded
+  const propertyMedia = [...images, video];
+
+  console.log(propertyMedia)
+
+  const signedUrls = await getSignedUrl(propertyMedia);
+  console.log(signedUrls)
+
+  res
+  .status(201)
+  .json(handleResponse({ message: "Property created" }));
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {
@@ -345,4 +384,5 @@ module.exports = {
   handleListedHouses,
   handleGetProperty,
   handleAddReview,
+  handleUploadWithUrl,
 };

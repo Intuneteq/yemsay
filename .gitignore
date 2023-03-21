@@ -6,3 +6,5 @@ client_secret.json
 .env
 
 client_secret.json
+
+.serverless

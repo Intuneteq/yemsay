@@ -9,26 +9,43 @@
       rel="stylesheet"
     />
 
-    <style>
+     <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; scroll-behavior:
+      smooth; font-family: "Open Sans"; } html, body { width: 100%; height:
+      100%; margin: 0; padding: 0; overflow-x: hidden; } .mail-content { width:
+      100%; height: 100%; margin: 20px auto; box-shadow: 0 5px 4px #4F4F4F; }
+      header { width: 100%; height: 8.7rem; background-color: #EF8424;
+      padding-left: 4.063rem; padding-top: 5.438rem; } header > h1 { color:
+      #FFFFFF; font-weight: 700; font-size: 1.875rem; line-height: 2.5rem;
+      text-transform: capitalize; } .content-container { padding: 65px; width:
+      100%; background-color: #FFFFFF; } .content-head { padding-bottom: 26.5px;
+      border-bottom: 1px solid #292929; } .content-head > p { color: #000000;
+      font-weight: 400; font-size: 1.25rem; line-height: 1.688rem; }
+      .content-body { width: 100%; padding: 2.813rem 0 10px; border-bottom: 1px
+      solid #292929; } .content { width: 100%; color: #000000; display: flex;
+      align-items: flex-start; justify-content: flex-start; margin-bottom: 35px;
+      } .content > h6 { min-width: 200px; font-weight: 600; font-size: 20px; }
+      .content > p { font-weight: 400; font-size: 1.25rem; text-align: justify;
+      }
     </style>
   </head>
 
   <body>
     <div class="mail-content">
       <header>
-        <h1>You Received A Mail From: {{{firstName}}} {{{lastName}}}</h1>
+        <h1>You Received An Inspection Schedule.</h1>
       </header>
 
       <div class="content-container">
         <section class="content-head">
-          <p style="margin-bottom: 23px;">Hi Yemsay,</p>
-          <p style="margin-bottom: 46px;">You have been booked!</p>
-          <p>Here’s all you need to know about the mail:</p>
+          <p style="margin-bottom: 23px;">Hi Yemsays Properties</p>
+          <p style="margin-bottom: 46px;">A client is trying to schedule an inspection with you.</p>
+          <p>Here’s all you need to know about the schedule:</p>
         </section>
 
         <section class="content-body">
           <div class="content">
-            <h6>Sender Name:</h6>
+            <h6>Sender Full Name:</h6>
             <p style="text-transform: capitalize;">{{{firstName}}} {{{lastName}}}</p>
           </div>
           <div class="content">
@@ -36,11 +53,11 @@
             <p>{{{email}}}</p>
           </div>
           <div class="content">
-            <h6>Sender PhoneNumber:</h6>
-            <p>{{{PhoneNumber}}}</p>
+            <h6>Phone Number:</h6>
+            <p>{{{phoneNumber}}}</p>
           </div>
           <div class="content">
-            <h6>Sender Location:</h6>
+            <h6>Location:</h6>
             <p>{{{location}}}</p>
           </div>
           <div class="content">
@@ -50,10 +67,6 @@
           <div class="content">
             <h6>Inspection Time:</h6>
             <p>{{{inspectionTime}}}</p>
-          </div>
-          <div class="content">
-            <h6>Mail Subject:</h6>
-            <p>Appointment</p>
           </div>
           <div class="content">
             <h6>Sender Message:</h6>

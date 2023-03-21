@@ -14,13 +14,17 @@ const {
 
 //helpers
 const { createToken } = require("../lib/token");
+const { allTrue } = require("../lib/payload")
 
 const handleSignUp = handleAsync(async (req, res) => {
   const { email, password } = req.body;
 
+  const payload = allTrue(email, password);
+  if(!payload) throw createApiError('Incomplete payload', 422);
+
   //check if user exist
   const userExist = await Profile.findOne({ email }).exec();
-  if (userExist) throw createApiError("user with email already exist", 400);
+  if (userExist) throw createApiError(`admin with ${email} already exist`, 409);
 
   //hash user password
   const hashedPasswd = await bcrypt.hash(password, 10);
@@ -43,6 +47,9 @@ const handleSignUp = handleAsync(async (req, res) => {
 
 const handleLogin = handleAsync(async (req, res) => {
   const { email, password } = req.body;
+
+  const payload = allTrue(email, password);
+  if(!payload) throw createApiError('Incomplete payload', 422);
 
   //find admin
   const user = await Profile.findOne({ email }).exec();

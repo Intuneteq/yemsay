@@ -60,7 +60,7 @@ const handleAddProperty = handleAsync(async (req, res) => {
   try {
     await newProperty.save();
   } catch (error) {
-    throw createApiError("server error", 500);
+    throw createApiError(error.message, 400);
   }
 
   res

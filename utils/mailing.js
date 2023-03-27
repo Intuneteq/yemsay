@@ -1,9 +1,6 @@
-const path = require("path");
-
-const hbs = require("nodemailer-express-handlebars");
 const nodemailer = require("nodemailer");
-require("dotenv").config();
 
+// Set up the Nodemailer transporter
 let transporter = nodemailer.createTransport({
   host: "smtp-mail.outlook.com",
   auth: {
@@ -11,18 +8,6 @@ let transporter = nodemailer.createTransport({
     pass: process.env.AUTH_PASS,
   },
 });
-
-const handlebarOptions = {
-  viewEngine: {
-    defaultLayout: false,
-    extName: ".handlebars",
-    partialsDir: path.resolve(__dirname, "..", "handlebars"),
-  },
-  viewPath: path.resolve(__dirname, "..", "handlebars"),
-  extName: ".handlebars",
-};
-
-transporter.use("compile", hbs(handlebarOptions));
 
 const verifyTransPorter = async () => await transporter.verify();
 

@@ -5,12 +5,12 @@ const errorHandler = function (err, req, res, next) {
     // A Multer error occurred when uploading.
     res
       .status(400)
-      .json({ message: err.message, success: false });
+      .json({ message: err.message, success: false, MulterError: true });
   } else if (err) {
     // An unknown error occurred when uploading.
     res
-      .status(500)
-      .json({ message: "An unknown error occurred.", success: false });
+      .status(400)
+      .json({ message: err.message, success: false, MulterError: false });
   } else {
     next();
   }

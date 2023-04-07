@@ -283,7 +283,7 @@ const handlePropertyListing = handleAsync(async (req, res) => {
   const { status } = req.body;
   const { propertyId } = req.params;
 
-  if (!["listed", "unlisted", "sold", "deleted"].includes(status.toLowercase())) {
+  if (!["listed", "unlisted", "sold", "deleted"].includes(status.toLowerCase())) {
     throw createApiError("Invalid property status provided", 400);
   }
 
@@ -293,7 +293,7 @@ const handlePropertyListing = handleAsync(async (req, res) => {
       adminId: user._id,
       _id: propertyId,
     },
-    { $set: { propertyStatus: status } },
+    { $set: { propertyStatus: status.toLowerCase() } },
     { new: true }
   );
 

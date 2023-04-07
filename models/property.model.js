@@ -15,9 +15,26 @@ const ReviewerSchema = new Schema(
       type: String,
       required: true,
     },
+    reviewScore: {
+      type: Number
+    }
   },
   { timestamps: true }
 );
+
+const ManagerSchema = new Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  phoneNumber: {
+    type: String,
+    required: true
+  },
+  avatar: {
+    type: Buffer
+  }
+})
 
 const PropertySchema = new Schema(
   {
@@ -88,6 +105,7 @@ const PropertySchema = new Schema(
       default: 0,
     },
     reviewers: [ReviewerSchema],
+    salesSupport: ManagerSchema
   },
   { timestamps: true }
 );
@@ -118,6 +136,21 @@ PropertySchema.methods.updateReviews = function ({
   );
 };
 
+PropertySchema.methods.miniFormat = function () {
+  return {
+    id: this._id,
+    title: this.title,
+    location: this.location,
+    price: this.price,
+    type: this.propertyType,
+    status: this.propertyStatus,
+    tags: this.tags,
+    features: this.features,
+    image: this.media.imgs[0],
+    createdAt: this.createdAt,
+  }
+}
+
 PropertySchema.methods.format = function () {
   return {
     id: this._id,
@@ -129,6 +162,11 @@ PropertySchema.methods.format = function () {
     tags: this.tags,
     features: this.features,
     media: this.media,
+    salesSupport: {
+      name: this.salesSupport.name,
+      phoneNumber: this.salesSupport.phoneNumber,
+      avatar: this.salesSupport.avatar?.toString("base64") ?? null
+    },
     createdAt: this.createdAt,
   };
 };

@@ -17,8 +17,18 @@ const handleAddProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const images = req.files.images;
   const video = req.files.video[0];
-  const { title, location, price, propertyType, description, tags, features } =
-    req.body;
+  const avatar = req.files.avatar[0];
+  const {
+    title,
+    location,
+    price,
+    propertyType,
+    description,
+    tags,
+    features,
+    salesSupportName,
+    salesSupportNum,
+  } = req.body;
 
   const payload = allTrue(
     title,
@@ -44,6 +54,13 @@ const handleAddProperty = handleAsync(async (req, res) => {
     video: videoUrl,
   };
 
+  // Sales support
+  const salesSupport = {
+    name: salesSupportName,
+    phoneNumber: salesSupportNum,
+    avatar: avatar ? avatar.buffer : null,
+  };
+
   //create new property
   const newProperty = new Properties({
     adminId: user._id,
@@ -55,6 +72,7 @@ const handleAddProperty = handleAsync(async (req, res) => {
     tags,
     features,
     media,
+    salesSupport,
   });
 
   try {
@@ -63,9 +81,7 @@ const handleAddProperty = handleAsync(async (req, res) => {
     throw createApiError(error.message, 400);
   }
 
-  res
-    .status(201)
-    .json(handleResponse({ message: "Property created", data: newProperty }));
+  res.status(201).json(handleResponse(newProperty.format()));
 });
 
 const handleUploadWithUrl = handleAsync(async (req, res) => {
@@ -125,9 +141,13 @@ const handleUploadWithUrl = handleAsync(async (req, res) => {
     throw createApiError("server error", 500);
   }
 
-  res
-    .status(201)
-    .json(handleResponse({ message: "Property created", results, property: newProperty }));
+  res.status(201).json(
+    handleResponse({
+      message: "Property created",
+      results,
+      property: newProperty,
+    })
+  );
 });
 
 const handleGetAllProperties = handleAsync(async (req, res) => {
@@ -154,7 +174,7 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
   };
 
   properties.forEach((property) => {
-    const item = property.format();
+    const item = property.miniFormat();
 
     const listedHouse =
       property.propertyType == "house" && property.propertyStatus == "listed";
@@ -195,7 +215,7 @@ const handleGetAllProperties = handleAsync(async (req, res) => {
     }
   });
 
-  res.status(201).json(handleResponse({ houses, lands }));
+  res.status(200).json(handleResponse({ houses, lands }));
 });
 
 const handleGetAdminPropertyById = handleAsync(async (req, res) => {
@@ -210,7 +230,7 @@ const handleGetAdminPropertyById = handleAsync(async (req, res) => {
 
   if (!property) throw createApiError("property not found", 404);
 
-  res.status(201).json(handleResponse({ property }));
+  res.status(201).json(handleResponse(property.format()));
 });
 
 const handleDashboard = handleAsync(async (req, res) => {
@@ -228,16 +248,34 @@ const handleDashboard = handleAsync(async (req, res) => {
       if (property.propertyStatus == "listed") listed++;
       if (property.propertyStatus == "unlisted") unlisted++;
 
-      return property.format();
+      return property.miniFormat();
     })
     .slice(0, 2);
 
-  res.status(201).json({
-    listed,
-    unlisted,
-    allProperties: properties.length,
-    recentlyAdded: recentlyAddedProperties,
-  });
+  // Get Reviews
+  const reviews = properties
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map((review) => {
+      if (Object.keys(review.reviewers).length >= 1) {
+        return {
+          score: review.reviewers.reviewScore,
+          name: review.reviewers.name,
+          review: review.reviewers.review,
+        };
+      }
+    })
+    .slice(0, 5)
+    .filter((item) => item === null);
+
+  res.status(200).json(
+    handleResponse({
+      listed,
+      unlisted,
+      allProperties: properties.length,
+      recentlyAdded: recentlyAddedProperties,
+      reviews,
+    })
+  );
 });
 
 const handlePropertyListing = handleAsync(async (req, res) => {
@@ -263,18 +301,16 @@ const handlePropertyListing = handleAsync(async (req, res) => {
     throw createApiError("Property not found", 404);
   }
 
-  res.status(200).json(handleResponse({ property }));
+  res.status(200).json(handleResponse(property.format()));
 });
 
 const handleEditProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
   const images = req.files.images;
-  const video = req.files.video[0];
-  const { title, location, price, propertyType, description, tags, features } =
-    req.body;
-
-  const payload = allTrue(
+  const video = req.files.video?.length && req.files.video[0];
+  const avatar = req.files.avatar?.length && req.files.avatar[0];
+  const {
     title,
     location,
     price,
@@ -282,50 +318,51 @@ const handleEditProperty = handleAsync(async (req, res) => {
     description,
     tags,
     features,
-    images,
-    video
-  );
-  if (!payload) throw createApiError("Payload Incomplete", 422);
+    salesSupportName,
+    salesSupportNum,
+  } = req.body;
 
-  //property media to be uploaded
-  const propertyMedia = [...images, video];
-
-  //upload property media to google clouds
-  const publicUrls = await uploadProperty(propertyMedia);
-
-  // extract video url. It will always come last
-  const videoUrl = publicUrls.pop();
-  const media = {
-    imgs: [...publicUrls],
-    video: videoUrl,
-  };
-
-  //find admin properties with propertyId and update
-  const property = await Properties.findOneAndUpdate(
-    {
-      adminId: user._id,
-      _id: propertyId,
-    },
-    {
-      $set: {
-        title,
-        location,
-        price,
-        propertyType,
-        description,
-        media,
-        tags,
-        features,
-      },
-    },
-    { new: true }
-  );
+  const property = await Properties.findOne({
+    adminId: user._id,
+    _id: propertyId,
+  });
 
   if (!property) {
     throw createApiError("Property not found", 404);
   }
 
-  res.status(200).json(handleResponse({ property }));
+  if (images?.length) {
+    //property media to be uploaded
+    const propertyMedia = video ? [...images, video] : [...images];
+
+    //upload property media to google clouds
+    const publicUrls = await uploadProperty(propertyMedia);
+
+    if (video) {
+      // extract video url. It will always come last
+      const videoUrl = publicUrls.pop();
+      property.media.video = videoUrl;
+    }
+
+    // Update images
+    property.media.imgs = [...publicUrls];
+  }
+
+  property.title = title ?? property.title;
+  property.location = location ?? property.location;
+  property.price = price ?? property.price;
+  property.propertyType = propertyType ?? property.propertyType;
+  property.description = description ?? property.description;
+  property.tags = tags?.length ? tags : property.tags;
+  property.features = features?.length ? features : property.features;
+  property.salesSupport.name = salesSupportName ?? property.salesSupport.name;
+  property.salesSupport.phoneNumber =
+    salesSupportNum ?? property.salesSupport.phoneNumber;
+  property.salesSupport.avatar = avatar?.buffer ?? property.salesSupport.avatar;
+
+  await property.save();
+
+  res.status(200).json(handleResponse(property.format()));
 });
 
 const handleListedLands = handleAsync(async (req, res) => {
@@ -335,7 +372,9 @@ const handleListedLands = handleAsync(async (req, res) => {
     .where("propertyStatus")
     .equals("listed");
 
-  res.status(200).json({ listedLands });
+  const response = listedLands.map((listed) => listed.miniFormat());
+
+  res.status(200).json(handleResponse(response));
 });
 
 const handleListedHouses = handleAsync(async (req, res) => {
@@ -345,7 +384,9 @@ const handleListedHouses = handleAsync(async (req, res) => {
     .where("propertyStatus")
     .equals("listed");
 
-  res.status(200).json({ listedHouses });
+  const response = listedHouses.map((listed) => listed.miniFormat());
+
+  res.status(200).json(handleResponse(response));
 });
 
 const handleGetProperty = handleAsync(async (req, res) => {
@@ -363,7 +404,14 @@ const handleGetProperty = handleAsync(async (req, res) => {
     .limit(9)
     .exec();
 
-  res.status(200).json({ property, similarProperties });
+  const simPropRes = similarProperties.map((sim) => sim.miniFormat());
+
+  res.status(200).json(
+    handleResponse({
+      property: property.format(),
+      similarProperties: simPropRes,
+    })
+  );
 });
 
 const handleAddReview = handleAsync(async (req, res) => {
@@ -393,7 +441,18 @@ const handleAddReview = handleAsync(async (req, res) => {
 
   await selectedProperty.save();
 
-  res.status(200).json({ message: "review updated" });
+  res.status(200).json(handleResponse());
+});
+
+const handleGetLatestProperties = handleAsync(async (req, res) => {
+  const properties = await Properties.find();
+
+  const recentProperties = properties
+    .sort((a, b) => a.createdAt - b.createdAt)
+    .map((property) => property.miniFormat())
+    .slice(0, 4);
+
+  res.status(200).json(handleResponse(recentProperties));
 });
 
 module.exports = {
@@ -408,4 +467,5 @@ module.exports = {
   handleGetProperty,
   handleAddReview,
   handleUploadWithUrl,
+  handleGetLatestProperties
 };

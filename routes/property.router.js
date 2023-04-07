@@ -16,7 +16,10 @@ const upload = multer({
 
 //import middleware
 const authentication = require("../middlewares/authentication");
-const fileExtLimiter = require("../middlewares/fileExtLimiter");
+const {
+  fileExtLimiter,
+  fileEditExtLimiter,
+} = require("../middlewares/fileExtLimiter");
 const errorHandler = require("../middlewares/errorHandler");
 
 //import controller
@@ -31,16 +34,18 @@ const {
   handleListedHouses,
   handleGetProperty,
   handleAddReview,
-  handleUploadWithUrl
+  handleUploadWithUrl,
+  handleGetLatestProperties
 } = require("../controllers/property.controller");
 
 //get req
-router.get("/lands", handleListedLands)
-router.get("/houses", handleListedHouses)
+router.get("/lands", handleListedLands);
+router.get("/houses", handleListedHouses);
+router.get("/recent", handleGetLatestProperties);
 router.get("/admin", authentication, handleGetAllProperties);
 router.get("/admin/dashboard", authentication, handleDashboard);
 router.get("/admin/:propertyId", authentication, handleGetAdminPropertyById);
-router.get("/:propertyId", handleGetProperty)
+router.get("/:propertyId", handleGetProperty);
 
 //post req
 router.post(
@@ -49,15 +54,20 @@ router.post(
   upload.fields([
     { name: "images", maxCount: 4 },
     { name: "video", maxCount: 1 },
+    { name: "avatar", maxCount: 1 },
   ]),
   fileExtLimiter,
   handleAddProperty
 );
-router.post('/admin/signed-url', authentication, handleUploadWithUrl)
-router.post('/review/:propertyId', handleAddReview);
+router.post("/admin/signed-url", authentication, handleUploadWithUrl);
+router.post("/review/:propertyId", handleAddReview);
 
 //put or patch req
-router.patch("/admin/listing/:propertyId", authentication, handlePropertyListing);
+router.patch(
+  "/admin/listing/:propertyId",
+  authentication,
+  handlePropertyListing
+);
 router.put(
   "/admin/:propertyId",
   authentication,
@@ -65,7 +75,7 @@ router.put(
     { name: "images", maxCount: 4 },
     { name: "video", maxCount: 1 },
   ]),
-  fileExtLimiter,
+  fileEditExtLimiter,
   handleEditProperty
 );
 

@@ -155,6 +155,7 @@ PropertySchema.methods.format = function () {
   return {
     id: this._id,
     title: this.title,
+    description: this.description,
     location: this.location,
     price: this.price,
     type: this.propertyType,

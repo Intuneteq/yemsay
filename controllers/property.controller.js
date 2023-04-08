@@ -245,7 +245,7 @@ const handleDashboard = handleAsync(async (req, res) => {
   let listed = 0;
   let unlisted = 0;
   const recentlyAddedProperties = properties
-    .sort((a, b) => a.createdAt - b.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt)
     .map((property) => {
       if (property.propertyStatus == "listed") listed++;
       if (property.propertyStatus == "unlisted") unlisted++;
@@ -256,7 +256,7 @@ const handleDashboard = handleAsync(async (req, res) => {
 
     // Get all reviews
   const reviews = properties
-    .sort((a, b) => a.createdAt - b.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt)
     .reduce((acc, curr) => {
       const currentProp = curr.reviewers.map((review) => {
         return {

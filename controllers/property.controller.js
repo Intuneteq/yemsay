@@ -427,7 +427,6 @@ const handleAddReview = handleAsync(async (req, res) => {
   const selectedProperty = await Properties.findById(propertyId);
 
   const reviewScore = (property + valueForMoney + location + support + 5) / 5;
-  console.log(reviewScore);
   //save reviewer
   selectedProperty.reviewers = [
     ...selectedProperty.reviewers,
@@ -454,7 +453,7 @@ const handleGetLatestProperties = handleAsync(async (req, res) => {
   const properties = await Properties.find();
 
   const recentProperties = properties
-    .sort((a, b) => a.createdAt - b.createdAt)
+    .sort((a, b) => b.createdAt - a.createdAt)
     .map((property) => property.miniFormat())
     .slice(0, 4);
 

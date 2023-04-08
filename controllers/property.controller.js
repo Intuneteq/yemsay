@@ -17,7 +17,7 @@ const handleAddProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const images = req.files.images;
   const video = req.files.video[0];
-  const avatar = req.files.avatar[0];
+  const avatar = req.files.avatar && req.files.avatar[0];
   const {
     title,
     location,

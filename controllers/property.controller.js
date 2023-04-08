@@ -240,6 +240,8 @@ const handleDashboard = handleAsync(async (req, res) => {
   if (!properties || !properties.length)
     throw createApiError("properties not found", 404);
 
+  // console.log('porperty 1', properties)
+
   let listed = 0;
   let unlisted = 0;
   const recentlyAddedProperties = properties
@@ -252,20 +254,20 @@ const handleDashboard = handleAsync(async (req, res) => {
     })
     .slice(0, 2);
 
-  // Get Reviews
+    // Get all reviews
   const reviews = properties
     .sort((a, b) => a.createdAt - b.createdAt)
-    .map((review) => {
-      if (Object.keys(review.reviewers).length >= 1) {
+    .reduce((acc, curr) => {
+      const currentProp = curr.reviewers.map((review) => {
         return {
-          score: review.reviewers.reviewScore,
-          name: review.reviewers.name,
-          review: review.reviewers.review,
+          score: review.reviewScore,
+          name: review.name,
+          review: review.review,
         };
-      }
-    })
-    .slice(0, 5)
-    .filter((item) => item === null);
+      });
+      return [...acc, ...currentProp];
+    }, [])
+    .slice(0, 5);
 
   res.status(200).json(
     handleResponse({
@@ -424,10 +426,12 @@ const handleAddReview = handleAsync(async (req, res) => {
   //Get Property
   const selectedProperty = await Properties.findById(propertyId);
 
+  const reviewScore = (property + valueForMoney + location + support + 5) / 5;
+  console.log(reviewScore);
   //save reviewer
   selectedProperty.reviewers = [
     ...selectedProperty.reviewers,
-    { name, email, review },
+    { name, email, review, reviewScore },
   ];
 
   //update reviewer count by invoking the virtual method

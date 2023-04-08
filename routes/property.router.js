@@ -74,6 +74,7 @@ router.put(
   upload.fields([
     { name: "images", maxCount: 4 },
     { name: "video", maxCount: 1 },
+    { name: "avatar", maxCount: 1 },
   ]),
   fileEditExtLimiter,
   handleEditProperty

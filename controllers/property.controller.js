@@ -283,7 +283,9 @@ const handlePropertyListing = handleAsync(async (req, res) => {
   const { status } = req.body;
   const { propertyId } = req.params;
 
-  if (!["listed", "unlisted", "sold", "deleted"].includes(status.toLowerCase())) {
+  if (
+    !["listed", "unlisted", "sold", "deleted"].includes(status.toLowerCase())
+  ) {
     throw createApiError("Invalid property status provided", 400);
   }
 
@@ -408,7 +410,7 @@ const handleGetProperty = handleAsync(async (req, res) => {
 
   res.status(200).json(
     handleResponse({
-      property: property.format(),
+      property: { ...property.format(), ...property.reviewFormat() },
       similarProperties: simPropRes,
     })
   );
@@ -467,5 +469,5 @@ module.exports = {
   handleGetProperty,
   handleAddReview,
   handleUploadWithUrl,
-  handleGetLatestProperties
+  handleGetLatestProperties,
 };

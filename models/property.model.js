@@ -172,4 +172,16 @@ PropertySchema.methods.format = function () {
   };
 };
 
+PropertySchema.methods.reviewFormat = function () {
+  return {
+    totalRating: this.avgReviewScore,
+    propertyRating: this.avgPropertyScore,
+    locationRating: this.avgLocationScore,
+    valueForMoneyRating: this.avgValueForMoneyScore,
+    supportRating: this.avgSupportScore,
+    totalReviewers: this.totalReviewers,
+    reviewers: this.reviewers
+  }
+}
+
 module.exports = mongoose.model("Property", PropertySchema);

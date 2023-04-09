@@ -240,8 +240,6 @@ const handleDashboard = handleAsync(async (req, res) => {
   if (!properties || !properties.length)
     throw createApiError("properties not found", 404);
 
-  // console.log('porperty 1', properties)
-
   let listed = 0;
   let unlisted = 0;
   const recentlyAddedProperties = properties
@@ -271,6 +269,7 @@ const handleDashboard = handleAsync(async (req, res) => {
 
   res.status(200).json(
     handleResponse({
+      name: user.fullName,
       listed,
       unlisted,
       allProperties: properties.length,
@@ -459,6 +458,14 @@ const handleGetLatestProperties = handleAsync(async (req, res) => {
 
   res.status(200).json(handleResponse(recentProperties));
 });
+
+// const handleBannerDetails = handleAsync(async (req, res) => {
+//   const properties = await Properties.find();
+
+//   const homeForSale = properties.map(prop => item.propertyStatus === 'listed');
+
+  
+// });
 
 module.exports = {
   handleAddProperty,

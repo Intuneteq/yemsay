@@ -17,7 +17,7 @@ const { createToken } = require("../lib/token");
 const { allTrue } = require("../lib/payload")
 
 const handleSignUp = handleAsync(async (req, res) => {
-  const { email, password } = req.body;
+  const { fullName, email, password } = req.body;
 
   const payload = allTrue(email, password);
   if(!payload) throw createApiError('Incomplete payload', 422);
@@ -32,6 +32,7 @@ const handleSignUp = handleAsync(async (req, res) => {
   //create new admin profile
   try {
     const user = new Profile({
+      fullName,
       email,
       password: hashedPasswd,
     });
@@ -65,7 +66,7 @@ const handleLogin = handleAsync(async (req, res) => {
   res
     .status(200)
     .json(
-      handleResponse({ message: email + " Sign In Successful", accessToken })
+      handleResponse({ name: user.fullName, accessToken })
     );
 });
 

@@ -250,9 +250,9 @@ const handleDashboard = handleAsync(async (req, res) => {
 
       return property.miniFormat();
     })
-    .slice(0, 2);
+    .slice(0, 4);
 
-    // Get all reviews
+  // Get all reviews
   const reviews = properties
     .sort((a, b) => b.createdAt - a.createdAt)
     .reduce((acc, curr) => {
@@ -261,6 +261,7 @@ const handleDashboard = handleAsync(async (req, res) => {
           score: review.reviewScore,
           name: review.name,
           review: review.review,
+          createdAt: review.createdAt,
         };
       });
       return [...acc, ...currentProp];
@@ -459,13 +460,58 @@ const handleGetLatestProperties = handleAsync(async (req, res) => {
   res.status(200).json(handleResponse(recentProperties));
 });
 
-// const handleBannerDetails = handleAsync(async (req, res) => {
-//   const properties = await Properties.find();
+const handleBannerDetails = handleAsync(async (req, res) => {
+  const properties = await Properties.find().select(
+    "title propertyStatus propertyType"
+  );
 
-//   const homeForSale = properties.map(prop => item.propertyStatus === 'listed');
+  const separateProperties = properties.reduce(
+    (acc, curr) => {
+      const listedHouse =
+        curr.propertyType === "house" && curr.propertyStatus === "listed";
+      const listedLand =
+        curr.propertyType === "land" && curr.propertyStatus === "listed";
 
-  
-// });
+      if (curr.propertyStatus === "sold") {
+        acc.sold.push(curr);
+      }
+
+      if (listedHouse) {
+        acc.home.push(curr);
+      }
+
+      if (listedLand) {
+        acc.land.push(curr);
+      }
+      return acc;
+    },
+    { home: [], land: [], sold: [] }
+  );
+
+  res.status(200).json(
+    handleResponse({
+      homeForSale: separateProperties.home.length,
+      landForSale: separateProperties.land.length,
+      sold: separateProperties.sold.length,
+    })
+  );
+});
+
+const handleDeleteProperty = handleAsync(async (req, res) => {
+  const user = req.user;
+  const { propertyId } = req.params;
+
+  if(!propertyId) throw createApiError('Please Provide PropertyId', 400);
+
+  const property = await Properties.findOneAndDelete({
+    adminId: user._id,
+    _id: propertyId,
+  });
+
+  if(!property) throw createApiError('property not found', 404);
+
+  res.status(200).json(handleResponse());
+});
 
 module.exports = {
   handleAddProperty,
@@ -480,4 +526,6 @@ module.exports = {
   handleAddReview,
   handleUploadWithUrl,
   handleGetLatestProperties,
+  handleBannerDetails,
+  handleDeleteProperty
 };

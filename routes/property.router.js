@@ -35,13 +35,16 @@ const {
   handleGetProperty,
   handleAddReview,
   handleUploadWithUrl,
-  handleGetLatestProperties
+  handleGetLatestProperties,
+  handleBannerDetails,
+  handleDeleteProperty
 } = require("../controllers/property.controller");
 
 //get req
 router.get("/lands", handleListedLands);
 router.get("/houses", handleListedHouses);
 router.get("/recent", handleGetLatestProperties);
+router.get("/banner", handleBannerDetails);
 router.get("/admin", authentication, handleGetAllProperties);
 router.get("/admin/dashboard", authentication, handleDashboard);
 router.get("/admin/:propertyId", authentication, handleGetAdminPropertyById);
@@ -81,6 +84,7 @@ router.put(
 );
 
 //delete req
+router.delete('/:propertyId', authentication, handleDeleteProperty);
 
 // custom error handler to handle errors during file upload
 router.use(errorHandler);

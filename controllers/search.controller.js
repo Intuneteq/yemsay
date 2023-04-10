@@ -15,9 +15,11 @@ const {
 const handleSearchQuery = handleAsync(async (req, res) => {
   const { location, property, propertyType, averagePrice } = req.query;
 
-  /*
-    @property from the query = propertyType in the property model;
-    @propertyType from query = features in the property model;
+  /**
+    * @param property = propertyType in the property model;
+    * @param propertyType = features in the property model;
+    * @param location = location in Property model;
+    * @param averagePrice is derived and expected to match Price in property model
   */
 
   // Replace all consecutive spaces with a single space and then trim any leading/trailing spaces.
@@ -31,14 +33,14 @@ const handleSearchQuery = handleAsync(async (req, res) => {
   const propertyRegex = new RegExp(property, "i");
   const propertyTypeRegex = new RegExp(propertyTypeSearch, "i");
 
-  //Build the query object
+  // Build the query object
   const query = {
     $and: [
       { propertyStatus: "listed" },
+      { propertyType: { $regex: propertyRegex } },
       {
         $or: [
           { location: { $regex: locationRegex } },
-          { propertyType: { $regex: propertyRegex } },
           { features: { $elemMatch: { $regex: propertyTypeRegex } } },
           {
             price: averagePrice && {

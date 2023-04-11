@@ -324,6 +324,7 @@ const handleEditProperty = handleAsync(async (req, res) => {
     features,
     salesSupportName,
     salesSupportNum,
+    imgs, // array of images in db to be updated
   } = req.body;
 
   const property = await Properties.findOne({
@@ -348,8 +349,22 @@ const handleEditProperty = handleAsync(async (req, res) => {
       property.media.video = videoUrl;
     }
 
-    // Update images
-    property.media.imgs = [...publicUrls];
+    // Enforce matching length for arrays of images to be updated with array of images to be updated with
+    const isMatch = imgs.length === publicUrls.length;
+
+    if (!isMatch) throw createApiError("upload the image to be updated", 400);
+
+    let i = 0;
+    let j = 0;
+    // Update images at their index with the newly uploaded image
+    while (i < imgs.length && j < publicUrls.length) {
+      const index = property.media.imgs.indexOf(imgs[i]);
+      if (index !== -1) {
+        property.media.imgs[index] = publicUrls[j];
+      }
+      i++;
+      j++;
+    }
   }
 
   property.title = title ?? property.title;
@@ -501,14 +516,14 @@ const handleDeleteProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  if(!propertyId) throw createApiError('Please Provide PropertyId', 400);
+  if (!propertyId) throw createApiError("Please Provide PropertyId", 400);
 
   const property = await Properties.findOneAndDelete({
     adminId: user._id,
     _id: propertyId,
   });
 
-  if(!property) throw createApiError('property not found', 404);
+  if (!property) throw createApiError("property not found", 404);
 
   res.status(200).json(handleResponse());
 });
@@ -527,5 +542,5 @@ module.exports = {
   handleUploadWithUrl,
   handleGetLatestProperties,
   handleBannerDetails,
-  handleDeleteProperty
+  handleDeleteProperty,
 };

@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
+// Helpers
+const { convertToCurrencies } = require('../lib/currency');
+
 const ReviewerSchema = new Schema(
   {
     name: {
@@ -16,8 +19,8 @@ const ReviewerSchema = new Schema(
       required: true,
     },
     reviewScore: {
-      type: Number
-    }
+      type: Number,
+    },
   },
   { timestamps: true }
 );
@@ -25,16 +28,16 @@ const ReviewerSchema = new Schema(
 const ManagerSchema = new Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   phoneNumber: {
     type: String,
-    required: true
+    required: true,
   },
   avatar: {
-    type: Buffer
-  }
-})
+    type: Buffer,
+  },
+});
 
 const PropertySchema = new Schema(
   {
@@ -54,6 +57,14 @@ const PropertySchema = new Schema(
     price: {
       type: Number,
       required: true,
+    },
+    USD: {
+      type: Number,
+      // required: true,
+    },
+    GBP: {
+      type: Number,
+      // required: true,
     },
     propertyType: {
       type: String,
@@ -105,7 +116,7 @@ const PropertySchema = new Schema(
       default: 0,
     },
     reviewers: [ReviewerSchema],
-    salesSupport: ManagerSchema
+    salesSupport: ManagerSchema,
   },
   { timestamps: true }
 );
@@ -142,14 +153,17 @@ PropertySchema.methods.miniFormat = function () {
     title: this.title,
     location: this.location,
     price: this.price,
+    NGN: this.price,
+    GBP: this.GBP ?? null,
+    USD: this.USD ?? null,
     type: this.propertyType,
     status: this.propertyStatus,
     tags: this.tags,
     features: this.features,
     image: this.media.imgs[0],
     createdAt: this.createdAt,
-  }
-}
+  };
+};
 
 PropertySchema.methods.format = function () {
   return {
@@ -158,6 +172,9 @@ PropertySchema.methods.format = function () {
     description: this.description,
     location: this.location,
     price: this.price,
+    NGN: this.price,
+    GBP: this.GBP,
+    USD: this.USD,
     type: this.propertyType,
     status: this.propertyStatus,
     tags: this.tags,
@@ -166,7 +183,7 @@ PropertySchema.methods.format = function () {
     salesSupport: {
       name: this.salesSupport.name,
       phoneNumber: this.salesSupport.phoneNumber,
-      avatar: this.salesSupport.avatar?.toString("base64") ?? null
+      avatar: this.salesSupport.avatar?.toString("base64") ?? null,
     },
     createdAt: this.createdAt,
   };
@@ -180,8 +197,15 @@ PropertySchema.methods.reviewFormat = function () {
     valueForMoneyRating: this.avgValueForMoneyScore,
     supportRating: this.avgSupportScore,
     totalReviewers: this.totalReviewers,
-    reviewers: this.reviewers
-  }
-}
+    reviewers: this.reviewers,
+  };
+};
+
+PropertySchema.pre('save', async function (next) {
+  const { USD, GBP, error } = await convertToCurrencies(this.price);
+  this.USD = USD;
+  this.GBP = GBP;
+  next();
+})
 
 module.exports = mongoose.model("Property", PropertySchema);

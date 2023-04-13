@@ -150,8 +150,30 @@ const handleUploadWithUrl = handleAsync(async (req, res) => {
   );
 });
 
+const handleGetProperties = handleAsync(async (req, res) => {
+  // Get auth user
+  const user = req.user;
+
+  // Req Params
+  const { propertyType, propertyStatus } = req.params;
+
+  if(!propertyType || !propertyStatus) throw createApiError('Bad Request', 400);
+
+  // Find admin Props with params
+  const properties = await Properties.find({
+    adminId: user._id,
+    propertyType,
+    propertyStatus
+  });
+
+  // Format response 
+  const response = properties.map((property) => property.miniFormat());
+
+  res.status(200).json(handleResponse(response));
+});
+
 const handleGetAllProperties = handleAsync(async (req, res) => {
-  //get auth user
+  // Get auth user
   const user = req.user;
 
   //find admin properties
@@ -530,7 +552,8 @@ const handleDeleteProperty = handleAsync(async (req, res) => {
 
 module.exports = {
   handleAddProperty,
-  handleGetAllProperties,
+  handleGetProperties,
+  handleGetAllProperties, // Deprecating soon
   handleGetAdminPropertyById,
   handleDashboard,
   handlePropertyListing,

@@ -25,7 +25,8 @@ const errorHandler = require("../middlewares/errorHandler");
 //import controller
 const {
   handleAddProperty,
-  handleGetAllProperties,
+  handleGetProperties,
+  handleGetAllProperties, // Deprecating soon
   handleGetAdminPropertyById,
   handleDashboard,
   handlePropertyListing,
@@ -48,6 +49,7 @@ router.get("/banner", handleBannerDetails);
 router.get("/admin", authentication, handleGetAllProperties);
 router.get("/admin/dashboard", authentication, handleDashboard);
 router.get("/admin/:propertyId", authentication, handleGetAdminPropertyById);
+router.get("/admin/:propertyType/status/:propertyStatus", authentication, handleGetProperties);
 router.get("/:propertyId", handleGetProperty);
 
 //post req

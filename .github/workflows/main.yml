@@ -22,7 +22,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    # - run: cp -rf /var/www/config/* /var/www/config/.* /var/www/techstudio-server/_work/Techtudio-site-server/Techtudio-site-server
+    - run: cp -rf /var/www/config/* /var/www/config/.* /var/www/yemsay-server/_work/yemsay/yemsay
     - run: npm install
     # - run: pm2 reload 2
     # - run: npm test

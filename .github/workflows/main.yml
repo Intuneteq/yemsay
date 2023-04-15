@@ -32,7 +32,7 @@ jobs:
       run: npm install
 
     - name: Start server instances
-      run: pm2 start index.js --name yemsay-server -i 2 --wait-ready --listen-timeout 30000
+      run: pm2 reload yemsay-server --update-env --wait-ready
 
     - name: Check if job failed or push not merged
       if: ${{ always() }}

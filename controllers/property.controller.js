@@ -157,16 +157,17 @@ const handleGetProperties = handleAsync(async (req, res) => {
   // Req Params
   const { propertyType, propertyStatus } = req.params;
 
-  if(!propertyType || !propertyStatus) throw createApiError('Bad Request', 400);
+  if (!propertyType || !propertyStatus)
+    throw createApiError("Bad Request", 400);
 
   // Find admin Props with params
   const properties = await Properties.find({
     adminId: user._id,
     propertyType,
-    propertyStatus
+    propertyStatus,
   });
 
-  // Format response 
+  // Format response
   const response = properties.map((property) => property.miniFormat());
 
   res.status(200).json(handleResponse(response));
@@ -487,7 +488,7 @@ const handleAddReview = handleAsync(async (req, res) => {
 });
 
 const handleGetLatestProperties = handleAsync(async (req, res) => {
-  const properties = await Properties.find();
+  const properties = await Properties.find({ propertyStatus: 'listed' });
 
   const recentProperties = properties
     .sort((a, b) => b.createdAt - a.createdAt)

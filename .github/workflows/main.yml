@@ -31,12 +31,5 @@ jobs:
     - name: Install dependencies
       run: npm install
 
-    - name: Start server instances
+    - name: Reload server instances
       run: pm2 reload yemsay-server --update-env --wait-ready
-
-    - name: Check if job failed or push not merged
-      if: ${{ always() }}
-      run: |
-        if [ ${{ job.status }} != "success" ] || [ ${{ github.event_name }} == "pull_request" ]; then
-          pm2 rollback
-        fi

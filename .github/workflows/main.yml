@@ -16,13 +16,27 @@ jobs:
         node-version: [14.x, 16.x, 18.x]
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - run: cp -rf /var/www/config/* /var/www/config/.* /var/www/yemsay-server/_work/yemsay/yemsay
-    - run: npm install
-    - run: pm2 gracefulReload 0
-    # - run: npm test
+    
+    - name: Copy env files from config folder
+      run: cp -rf /var/www/config/* /var/www/config/.* /var/www/yemsay-server/_work/yemsay/yemsay
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Start server instances
+    - run: pm2 start index.js --name yemsay-server -i 2 --wait-ready --listen-timeout 30000
+    
+    - name: Check if job failed or push not merged
+      if: ${{ always() }}
+      run: |
+        if [ ${{ job.status }} != "success" ] || [ ${{ github.event_name }} == "pull_request" ]; then
+          pm2 rollback
+        fi

@@ -13,8 +13,9 @@ const {
 } = require("../utils/helpers");
 
 //helpers
-const { createToken } = require("../lib/token");
-const { allTrue } = require("../lib/payload")
+const { createToken, verifyResetToken, generateSetPasswordLink } = require("../lib/token");
+const { allTrue } = require("../lib/payload");
+const { sendVerificationEmail } = require("../lib/mailingList");
 
 const handleSignUp = handleAsync(async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -91,18 +92,64 @@ const handleChangePassword = handleAsync(async(req, res) => {
    res.status(200).json(handleResponse({}, "Password Changed Successfully"))
 })
 
-// const handleEmailVerification = handleAsync(async(req, res) => {
-//   const { email } = req.body;
+const handleEmailVerification = handleAsync(async(req, res) => {
+  const { email } = req.body;
 
-//   //find admin
-//   const user = await Profile.findOne({ email: email.toLowerCase() }).exec();
-//   if (!user) throw createApiError("user not found", 404);
-// })
+  //find admin
+  const user = await Profile.findOne({ email: email.toLowerCase() }).exec();
+  if (!user) throw createApiError("user not found", 404);
+
+  const link = generateSetPasswordLink(user._id);
+
+  const { error, errorMessage } = await sendVerificationEmail(email, link);
+
+  if(error) throw createApiError(errorMessage, 500);
+
+  res.status(200).json(handleResponse({}, "Password change Link sent to " + email))
+});
+
+const handleForgotPassword = handleAsync(async(req, res) => {
+  const { password } = req.body;
+
+  // Bearer Token from request
+  const authHeader = req.headers.authorization;
+
+  // Authenticate user
+  if (!authHeader || !authHeader.startsWith("Bearer"))
+    throw createApiError("authentication invalid", 401);
+
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      msg: "Token not authorized",
+    });
+  }
+
+  // Verify Reset Token
+  const { error, user } = verifyResetToken(token);
+  if (error) throw createApiError("Expired token", 403);
+
+  // Find user
+  const foundUser = await Profile.findById(user.id);
+  if (!foundUser) throw createApiError("user not found", 404);
+
+  // Hash new password
+  const hashedPwd = await bcrypt.hash(password, 10);
+
+  // Update in db
+  foundUser.password = hashedPwd;
+  foundUser.save();
+
+  res.status(201).json(handleResponse({}, "Password changed"));
+})
 
 
 module.exports = {
   handleSignUp,
   handleLogin,
   handleChangePassword,
+  handleEmailVerification,
+  handleForgotPassword,
   //check
 };

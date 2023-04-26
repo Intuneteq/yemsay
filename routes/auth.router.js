@@ -22,7 +22,7 @@ router.post("/email-verification", handleEmailVerification);
 
 //put or patch req
 router.patch("/change-password", authentication, handleChangePassword);
-router.patch("forgot-password", handleForgotPassword);
+router.patch("/forgot-password", handleForgotPassword);
 
 //delete req
 

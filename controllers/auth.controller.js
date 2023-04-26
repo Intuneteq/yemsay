@@ -24,7 +24,7 @@ const handleSignUp = handleAsync(async (req, res) => {
   if(!payload) throw createApiError('Incomplete payload', 422);
 
   //check if user exist
-  const userExist = await Profile.findOne({ email }).exec();
+  const userExist = await Profile.findOne({ email: email.toLowerCase() }).exec();
   if (userExist) throw createApiError(`admin with ${email} already exist`, 409);
 
   //hash user password
@@ -34,7 +34,7 @@ const handleSignUp = handleAsync(async (req, res) => {
   try {
     const user = new Profile({
       fullName,
-      email,
+      email: email.toLowerCase(),
       password: hashedPasswd,
     });
     await user.save();

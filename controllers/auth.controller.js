@@ -53,7 +53,7 @@ const handleLogin = handleAsync(async (req, res) => {
   if(!payload) throw createApiError('Incomplete payload', 422);
 
   //find admin
-  const user = await Profile.findOne({ email }).exec();
+  const user = await Profile.findOne({ email: email.toLowerCase() }).exec();
   if (!user) throw createApiError("user not found", 404);
 
   //match password

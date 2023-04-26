@@ -9,7 +9,7 @@ const { handleSignUp, handleLogin } = require("../controllers/auth.controller");
 //get req
 
 //post req
-router.post("/signup", handleSignUp);
+// router.post("/signup", handleSignUp);
 router.post("/signin", handleLogin);
 
 //put or patch req

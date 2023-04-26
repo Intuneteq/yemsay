@@ -70,8 +70,39 @@ const handleLogin = handleAsync(async (req, res) => {
     );
 });
 
+const handleChangePassword = handleAsync(async(req, res) => {
+  const {oldPassword, newPassword} = req.body;
+
+  //find admin
+  const user = await Profile.findOne({ email: req.user.email.toLowerCase() }).exec();
+  if (!user) throw createApiError("user not found", 404);
+
+  //match password
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) throw createApiError("Incorrect password", 401);
+
+   //hash user new password
+   const hashedPasswd = await bcrypt.hash(newPassword, 10);
+
+   user.password = hashedPasswd
+
+   await user.save();
+
+   res.status(200).json(handleResponse({}, "Password Changed Successfully"))
+})
+
+// const handleEmailVerification = handleAsync(async(req, res) => {
+//   const { email } = req.body;
+
+//   //find admin
+//   const user = await Profile.findOne({ email: email.toLowerCase() }).exec();
+//   if (!user) throw createApiError("user not found", 404);
+// })
+
+
 module.exports = {
   handleSignUp,
   handleLogin,
+  handleChangePassword,
   //check
 };

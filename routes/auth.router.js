@@ -4,7 +4,7 @@ const router = express.Router();
 //import middleware
 
 //import controller
-const { handleSignUp, handleLogin } = require("../controllers/auth.controller");
+const { handleSignUp, handleLogin, handleChangePassword } = require("../controllers/auth.controller");
 
 //get req
 
@@ -13,6 +13,7 @@ const { handleSignUp, handleLogin } = require("../controllers/auth.controller");
 router.post("/signin", handleLogin);
 
 //put or patch req
+router.patch("/change-password")
 
 //delete req
 

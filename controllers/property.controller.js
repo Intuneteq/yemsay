@@ -1,3 +1,6 @@
+//library
+const mongoose = require("mongoose");
+
 //models
 const Properties = require("../models/property.model");
 
@@ -245,7 +248,10 @@ const handleGetAdminPropertyById = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  //find property properties with adminId and propertyId
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
+  // Find property properties with adminId and propertyId
   const property = await Properties.findOne({
     adminId: user._id,
     _id: propertyId,
@@ -253,7 +259,7 @@ const handleGetAdminPropertyById = handleAsync(async (req, res) => {
 
   if (!property) throw createApiError("property not found", 404);
 
-  res.status(201).json(handleResponse(property.format()));
+  res.status(200).json(handleResponse(property.format()));
 });
 
 const handleDashboard = handleAsync(async (req, res) => {
@@ -307,6 +313,9 @@ const handlePropertyListing = handleAsync(async (req, res) => {
   const user = req.user;
   const { status } = req.body;
   const { propertyId } = req.params;
+
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
 
   if (
     !["listed", "unlisted", "sold", "deleted"].includes(status.toLowerCase())
@@ -488,7 +497,7 @@ const handleAddReview = handleAsync(async (req, res) => {
 });
 
 const handleGetLatestProperties = handleAsync(async (req, res) => {
-  const properties = await Properties.find({ propertyStatus: 'listed' });
+  const properties = await Properties.find({ propertyStatus: "listed" });
 
   const recentProperties = properties
     .sort((a, b) => b.createdAt - a.createdAt)

@@ -102,12 +102,13 @@ const handleChangePassword = handleAsync(async (req, res) => {
 const handleEmailVerification = handleAsync(async (req, res) => {
   const { email } = req.body;
 
+  if (!email) throw createApiError("Incomplete Payload", 422);
+
   //find admin
   const user = await Profile.findOne({ email: email.toLowerCase() }).exec();
   if (!user) throw createApiError("user not found", 404);
 
   const link = generateSetPasswordLink(user._id);
-
   const { error, errorMessage } = await sendVerificationEmail(email, link);
 
   if (error) throw createApiError(errorMessage, 500);
@@ -138,6 +139,9 @@ const handleForgotPassword = handleAsync(async (req, res) => {
   // Verify Reset Token
   const { error, user } = verifyResetToken(token);
   if (error) throw createApiError("Expired token", 403);
+
+  // Validate password
+  if (!password) throw createApiError("Incomplete Payload", 422);
 
   // Find user
   const foundUser = await Profile.findById(user.id);

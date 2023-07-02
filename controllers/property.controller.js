@@ -359,6 +359,9 @@ const handleEditProperty = handleAsync(async (req, res) => {
     imgs, // array of images in db to be updated
   } = req.body;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
   const property = await Properties.findOne({
     adminId: user._id,
     _id: propertyId,
@@ -443,6 +446,9 @@ const handleListedHouses = handleAsync(async (req, res) => {
 const handleGetProperty = handleAsync(async (req, res) => {
   const { propertyId } = req.params;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
   const property = await Properties.findById(propertyId);
   if (!property) throw createApiError("property not found", 404);
 
@@ -470,8 +476,25 @@ const handleAddReview = handleAsync(async (req, res) => {
   const { property, valueForMoney, location, support, name, email, review } =
     req.body;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
+  const payload = allTrue(
+    property,
+    valueForMoney,
+    location,
+    support,
+    name,
+    email,
+    review
+  );
+
+  if (!payload) throw createApiError("Incomplete Payload", 400);
+
   //Get Property
   const selectedProperty = await Properties.findById(propertyId);
+
+  if (!selectedProperty) throw createApiError("Property not found", 404);
 
   const reviewScore = (property + valueForMoney + location + support + 5) / 5;
   //save reviewer
@@ -548,7 +571,8 @@ const handleDeleteProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  if (!propertyId) throw createApiError("Please Provide PropertyId", 400);
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
 
   const property = await Properties.findOneAndDelete({
     adminId: user._id,

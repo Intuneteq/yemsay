@@ -23,8 +23,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     
-    - name: Copy env files from config folder
-      run: cp -rf /var/www/config/* /var/www/config/.* /var/www/yemsay/_work/yemsay/yemsay
+    # - name: Copy env files from config folder
+    #   run: cp -rf /var/www/config/* /var/www/config/.* /var/www/yemsay/_work/yemsay/yemsay
 
     - name: Install dependencies
       run: npm install

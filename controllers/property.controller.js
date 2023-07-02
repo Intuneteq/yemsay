@@ -1,3 +1,6 @@
+//library
+const mongoose = require("mongoose");
+
 //models
 const Properties = require("../models/property.model");
 
@@ -245,7 +248,10 @@ const handleGetAdminPropertyById = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  //find property properties with adminId and propertyId
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
+  // Find property properties with adminId and propertyId
   const property = await Properties.findOne({
     adminId: user._id,
     _id: propertyId,
@@ -253,7 +259,7 @@ const handleGetAdminPropertyById = handleAsync(async (req, res) => {
 
   if (!property) throw createApiError("property not found", 404);
 
-  res.status(201).json(handleResponse(property.format()));
+  res.status(200).json(handleResponse(property.format()));
 });
 
 const handleDashboard = handleAsync(async (req, res) => {
@@ -308,6 +314,9 @@ const handlePropertyListing = handleAsync(async (req, res) => {
   const { status } = req.body;
   const { propertyId } = req.params;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
   if (
     !["listed", "unlisted", "sold", "deleted"].includes(status.toLowerCase())
   ) {
@@ -349,6 +358,9 @@ const handleEditProperty = handleAsync(async (req, res) => {
     salesSupportNum,
     imgs, // array of images in db to be updated
   } = req.body;
+
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
 
   const property = await Properties.findOne({
     adminId: user._id,
@@ -434,6 +446,9 @@ const handleListedHouses = handleAsync(async (req, res) => {
 const handleGetProperty = handleAsync(async (req, res) => {
   const { propertyId } = req.params;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
   const property = await Properties.findById(propertyId);
   if (!property) throw createApiError("property not found", 404);
 
@@ -461,8 +476,25 @@ const handleAddReview = handleAsync(async (req, res) => {
   const { property, valueForMoney, location, support, name, email, review } =
     req.body;
 
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
+
+  const payload = allTrue(
+    property,
+    valueForMoney,
+    location,
+    support,
+    name,
+    email,
+    review
+  );
+
+  if (!payload) throw createApiError("Incomplete Payload", 400);
+
   //Get Property
   const selectedProperty = await Properties.findById(propertyId);
+
+  if (!selectedProperty) throw createApiError("Property not found", 404);
 
   const reviewScore = (property + valueForMoney + location + support + 5) / 5;
   //save reviewer
@@ -488,7 +520,7 @@ const handleAddReview = handleAsync(async (req, res) => {
 });
 
 const handleGetLatestProperties = handleAsync(async (req, res) => {
-  const properties = await Properties.find({ propertyStatus: 'listed' });
+  const properties = await Properties.find({ propertyStatus: "listed" });
 
   const recentProperties = properties
     .sort((a, b) => b.createdAt - a.createdAt)
@@ -539,7 +571,8 @@ const handleDeleteProperty = handleAsync(async (req, res) => {
   const user = req.user;
   const { propertyId } = req.params;
 
-  if (!propertyId) throw createApiError("Please Provide PropertyId", 400);
+  if (!propertyId || !mongoose.Types.ObjectId.isValid(propertyId))
+    throw createApiError("Invalid propertyId", 400);
 
   const property = await Properties.findOneAndDelete({
     adminId: user._id,

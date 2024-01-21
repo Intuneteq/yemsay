@@ -30,4 +30,7 @@ jobs:
       run: npm install
 
     - name: Reload server instances
-      run: pm2 reload yemsay-server --update-env --wait-ready
+      run: pm2 reload 0 --update-env --wait-ready
+
+      
+      

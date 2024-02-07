@@ -16,7 +16,7 @@ const {
 //get req
 
 //post req
-// router.post("/signup", handleSignUp);
+router.post("/signup", handleSignUp);
 router.post("/signin", handleLogin);
 router.post("/email-verification", handleEmailVerification);
 
